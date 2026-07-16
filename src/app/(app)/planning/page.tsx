@@ -13,37 +13,40 @@ export default async function PlanningPage({
   const supabase = createClient();
   const {
     data: { user },
-    error: userError,
   } = await supabase.auth.getUser();
 
   const dateKey = searchParams.date ?? new Date().toISOString().slice(0, 10);
   const dayStart = new Date(`${dateKey}T00:00:00`);
   const dayEnd = new Date(`${dateKey}T23:59:59`);
 
-  const roomsResult = await supabase.from("rooms").select("*").eq("is_active", true).order("name");
-  const bookingsResult = await supabase
-    .from("bookings")
-    .select("*, organizer:profiles(*)")
-    .eq("status", "confirmed")
-    .gte("start_time", dayStart.toISOString())
-    .lte("start_time", dayEnd.toISOString())
-    .order("start_time");
+  const [{ data: rooms }, { data: bookings }] = await Promise.all([
+    supabase.from("rooms").select("*").eq("is_active", true).order("name"),
+    supabase
+      .from("bookings")
+      .select("*, organizer:profiles(*)")
+      .eq("status", "confirmed")
+      .gte("start_time", dayStart.toISOString())
+      .lte("start_time", dayEnd.toISOString())
+      .order("start_time"),
+  ]);
 
-  // --- DEBUG TEMPORAIRE ---
   return (
-    <pre style={{ whiteSpace: "pre-wrap", fontSize: 12, background: "#111", color: "#0f0", padding: 16 }}>
-      {JSON.stringify(
-        {
-          user: user ? { id: user.id, email: user.email } : null,
-          userError,
-          roomsCount: roomsResult.data?.length ?? 0,
-          roomsError: roomsResult.error,
-          bookingsCount: bookingsResult.data?.length ?? 0,
-          bookingsError: bookingsResult.error,
-        },
-        null,
-        2
-      )}
-    </pre>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="font-display text-2xl">Planning des salles</h1>
+          <p className="text-sm text-muted">
+            Cliquez sur un créneau libre pour réserver. Le planning se met à jour en temps réel.
+          </p>
+        </div>
+        <DateNav dateKey={dateKey} />
+      </div>
+      <PlanningGrid
+        dateKey={dateKey}
+        rooms={(rooms as Room[]) ?? []}
+        initialBookings={(bookings as Booking[]) ?? []}
+        currentUserId={user?.id ?? ""}
+      />
+    </div>
   );
 }
