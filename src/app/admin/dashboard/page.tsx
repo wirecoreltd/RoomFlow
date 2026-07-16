@@ -48,7 +48,7 @@ export default async function DashboardPage({
           <h1 className="font-display text-2xl">Tableau de bord</h1>
           <p className="text-sm text-muted">Statistiques d&apos;utilisation des salles.</p>
         </div>
-        <div className="flex gap-2 text-sm">
+       <div className="flex gap-2 text-sm">
           {[7, 30, 90].map((d) => (
             
               key={d}
