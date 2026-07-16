@@ -30,3 +30,29 @@ export function initials(name: string | null | undefined) {
     .map((p) => p[0]?.toUpperCase() ?? "")
     .join("");
 }
+export function startOfWeek(date: Date) {
+  const d = new Date(date);
+  const day = (d.getDay() + 6) % 7; // lundi = 0
+  d.setDate(d.getDate() - day);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+export function addDays(date: Date, n: number) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + n);
+  return d;
+}
+export function startOfMonth(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+export function endOfMonth(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+}
+export function addMonths(date: Date, n: number) {
+  const d = new Date(date);
+  d.setMonth(d.getMonth() + n);
+  return d;
+}
+export function formatMonthLong(date: Date) {
+  return date.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+}
