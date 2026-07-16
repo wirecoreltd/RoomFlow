@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import DashboardStats from "@/components/DashboardStats";
 
@@ -41,6 +42,8 @@ export default async function DashboardPage({
     );
   }
 
+  const periods = [7, 30, 90];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
@@ -48,18 +51,18 @@ export default async function DashboardPage({
           <h1 className="font-display text-2xl">Tableau de bord</h1>
           <p className="text-sm text-muted">Statistiques d&apos;utilisation des salles.</p>
         </div>
-       <div className="flex gap-2 text-sm">
-          {[7, 30, 90].map((d) => (
-            
-              key={d}
-              href={`/admin/dashboard?days=${d}`}
-              className={`px-3 py-1.5 rounded border ${
-                daysBack === d ? "bg-ink text-white border-ink" : "border-line text-muted hover:border-ink"
-              }`}
-            >
-              {d} jours
-            </a>
-          ))}
+        <div className="flex gap-2 text-sm">
+          {periods.map((d) => {
+            const isActive = daysBack === d;
+            const linkClass = isActive
+              ? "px-3 py-1.5 rounded border bg-ink text-white border-ink"
+              : "px-3 py-1.5 rounded border border-line text-muted hover:border-ink";
+            return (
+              <Link key={d} href={`/admin/dashboard?days=${d}`} className={linkClass}>
+                {d} jours
+              </Link>
+            );
+          })}
         </div>
       </div>
       <DashboardStats stats={stats} />
