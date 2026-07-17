@@ -27,6 +27,28 @@ const shellText: Record<Language, { headline: string[]; label: string; messages:
   },
 };
 
+function FlagFR() {
+  return (
+    <svg viewBox="0 0 3 2" className="h-6 w-9 sm:h-7 sm:w-10 rounded-sm overflow-hidden">
+      <rect width="1" height="2" x="0" fill="#0055A4" />
+      <rect width="1" height="2" x="1" fill="#FFFFFF" />
+      <rect width="1" height="2" x="2" fill="#EF4135" />
+    </svg>
+  );
+}
+
+function FlagGB() {
+  return (
+    <svg viewBox="0 0 60 30" className="h-6 w-9 sm:h-7 sm:w-10 rounded-sm overflow-hidden">
+      <rect width="60" height="30" fill="#00247D" />
+      <path d="M0,0 L60,30 M60,0 L0,30" stroke="#FFFFFF" strokeWidth="6" />
+      <path d="M0,0 L60,30 M60,0 L0,30" stroke="#CF142B" strokeWidth="2" />
+      <path d="M30,0 V30 M0,15 H60" stroke="#FFFFFF" strokeWidth="10" />
+      <path d="M30,0 V30 M0,15 H60" stroke="#CF142B" strokeWidth="6" />
+    </svg>
+  );
+}
+
 export default function AuthShell({
   title,
   subtitle,
@@ -68,7 +90,7 @@ export default function AuthShell({
               : "border-line/50 bg-white/70 opacity-70 hover:opacity-100 hover:scale-105"
           }`}
         >
-          <span className="text-3xl sm:text-4xl leading-none">🇫🇷</span>
+          <FlagFR />
         </button>
         <button
           type="button"
@@ -81,7 +103,7 @@ export default function AuthShell({
               : "border-line/50 bg-white/70 opacity-70 hover:opacity-100 hover:scale-105"
           }`}
         >
-          <span className="text-3xl sm:text-4xl leading-none">🇬🇧</span>
+          <FlagGB />
         </button>
       </div>
 
