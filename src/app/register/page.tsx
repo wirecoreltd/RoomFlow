@@ -4,9 +4,85 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import AuthShell from "@/components/AuthShell";
+import AuthShell, { type Language } from "@/components/AuthShell";
 
-type Language = "fr" | "en";
+const pageText: Record<
+  Language,
+  {
+    title: string;
+    subtitle: string;
+    companyNameLabel: string;
+    companyNamePlaceholder: string;
+    companyNameHint: string;
+    fullNameLabel: string;
+    fullNamePlaceholder: string;
+    emailLabel: string;
+    emailPlaceholder: string;
+    passwordLabel: string;
+    passwordPlaceholder: string;
+    submit: string;
+    submitLoading: string;
+    alreadyRegistered: string;
+    loginLink: string;
+    errorExists: string;
+    errorGeneric: string;
+    doneTitle: string;
+    doneSubtitle: string;
+    doneMessagePrefix: string;
+    doneMessageSuffix: string;
+    backToLogin: string;
+  }
+> = {
+  fr: {
+    title: "Créer un compte",
+    subtitle: "Réservez vos ressources en quelques secondes.",
+    companyNameLabel: "Nom de la société",
+    companyNamePlaceholder: "Acme SARL",
+    companyNameHint:
+      "Un espace privé sera créé pour votre société. Vos données ne seront jamais visibles par les autres sociétés.",
+    fullNameLabel: "Nom complet",
+    fullNamePlaceholder: "Marie Dupont",
+    emailLabel: "Email professionnel",
+    emailPlaceholder: "prenom.nom@entreprise.com",
+    passwordLabel: "Mot de passe",
+    passwordPlaceholder: "6 caractères minimum",
+    submit: "Créer mon compte",
+    submitLoading: "Création...",
+    alreadyRegistered: "Déjà inscrit ?",
+    loginLink: "Se connecter",
+    errorExists: "Un compte existe déjà avec cet email.",
+    errorGeneric: "Impossible de créer le compte. Réessayez.",
+    doneTitle: "Compte créé",
+    doneSubtitle: "Vérifiez votre boîte mail pour confirmer votre adresse.",
+    doneMessagePrefix: "Un email de confirmation vient d'être envoyé à",
+    doneMessageSuffix: "Une fois confirmé, vous pourrez vous connecter.",
+    backToLogin: "Retour à la connexion",
+  },
+  en: {
+    title: "Create an account",
+    subtitle: "Book your resources in seconds.",
+    companyNameLabel: "Company name",
+    companyNamePlaceholder: "Acme Ltd",
+    companyNameHint: "A private workspace will be created for your company. Your data is never visible to other companies.",
+    fullNameLabel: "Full name",
+    fullNamePlaceholder: "Jane Smith",
+    emailLabel: "Work email",
+    emailPlaceholder: "firstname.lastname@company.com",
+    passwordLabel: "Password",
+    passwordPlaceholder: "6 characters minimum",
+    submit: "Create my account",
+    submitLoading: "Creating...",
+    alreadyRegistered: "Already have an account?",
+    loginLink: "Sign in",
+    errorExists: "An account already exists with this email.",
+    errorGeneric: "Could not create the account. Please try again.",
+    doneTitle: "Account created",
+    doneSubtitle: "Check your inbox to confirm your address.",
+    doneMessagePrefix: "A confirmation email was just sent to",
+    doneMessageSuffix: "Once confirmed, you'll be able to sign in.",
+    backToLogin: "Back to sign in",
+  },
+};
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -19,6 +95,8 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const t = pageText[language];
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -37,11 +115,7 @@ export default function RegisterPage() {
     });
     setLoading(false);
     if (error) {
-      setError(
-        error.message === "User already registered"
-          ? "Un compte existe déjà avec cet email."
-          : "Impossible de créer le compte. Réessayez."
-      );
+      setError(error.message === "User already registered" ? t.errorExists : t.errorGeneric);
       return;
     }
     setDone(true);
@@ -49,14 +123,13 @@ export default function RegisterPage() {
 
   if (done) {
     return (
-      <AuthShell title="Compte créé" subtitle="Vérifiez votre boîte mail pour confirmer votre adresse.">
+      <AuthShell title={t.doneTitle} subtitle={t.doneSubtitle} language={language} onLanguageChange={setLanguage}>
         <div className="rounded border border-brand/20 bg-brand-light px-4 py-3 text-sm text-brand-dark">
-          Un email de confirmation vient d&apos;être envoyé à <strong>{email}</strong>. Une fois confirmé,
-          vous pourrez vous connecter.
+          {t.doneMessagePrefix} <strong>{email}</strong>. {t.doneMessageSuffix}
         </div>
         <p className="text-sm text-muted mt-6 text-center">
           <Link href="/login" className="text-brand font-medium hover:underline">
-            Retour à la connexion
+            {t.backToLogin}
           </Link>
         </p>
       </AuthShell>
@@ -64,11 +137,11 @@ export default function RegisterPage() {
   }
 
   return (
-    <AuthShell title="Créer un compte" subtitle="Réservez vos ressources en quelques secondes.">
+    <AuthShell title={t.title} subtitle={t.subtitle} language={language} onLanguageChange={setLanguage}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-text mb-1" htmlFor="companyName">
-            Nom de la société
+            {t.companyNameLabel}
           </label>
           <input
             id="companyName"
@@ -76,16 +149,14 @@ export default function RegisterPage() {
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
             className="w-full rounded border border-line bg-surface px-3 py-2 text-sm focus:border-brand outline-none"
-            placeholder="Acme SARL"
+            placeholder={t.companyNamePlaceholder}
           />
-          <p className="text-xs text-muted mt-1">
-            Un espace privé sera créé pour votre société. Vos données ne seront jamais visibles par les autres sociétés.
-          </p>
+          <p className="text-xs text-muted mt-1">{t.companyNameHint}</p>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-text mb-1" htmlFor="fullName">
-            Nom complet
+            {t.fullNameLabel}
           </label>
           <input
             id="fullName"
@@ -93,13 +164,13 @@ export default function RegisterPage() {
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             className="w-full rounded border border-line bg-surface px-3 py-2 text-sm focus:border-brand outline-none"
-            placeholder="Marie Dupont"
+            placeholder={t.fullNamePlaceholder}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-text mb-1" htmlFor="email">
-            Email professionnel
+            {t.emailLabel}
           </label>
           <input
             id="email"
@@ -108,13 +179,13 @@ export default function RegisterPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full rounded border border-line bg-surface px-3 py-2 text-sm focus:border-brand outline-none"
-            placeholder="prenom.nom@entreprise.com"
+            placeholder={t.emailPlaceholder}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-text mb-1" htmlFor="password">
-            Mot de passe
+            {t.passwordLabel}
           </label>
           <input
             id="password"
@@ -124,36 +195,8 @@ export default function RegisterPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full rounded border border-line bg-surface px-3 py-2 text-sm focus:border-brand outline-none"
-            placeholder="6 caractères minimum"
+            placeholder={t.passwordPlaceholder}
           />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-text mb-2">Langue de l&apos;application</label>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setLanguage("fr")}
-              className={`flex items-center justify-center gap-2 rounded border px-3 py-2.5 text-sm font-medium transition-colors ${
-                language === "fr"
-                  ? "border-brand bg-brand-light text-brand-dark"
-                  : "border-line text-muted hover:border-brand/40"
-              }`}
-            >
-              <span className="text-lg leading-none">🇫🇷</span> Français
-            </button>
-            <button
-              type="button"
-              onClick={() => setLanguage("en")}
-              className={`flex items-center justify-center gap-2 rounded border px-3 py-2.5 text-sm font-medium transition-colors ${
-                language === "en"
-                  ? "border-brand bg-brand-light text-brand-dark"
-                  : "border-line text-muted hover:border-brand/40"
-              }`}
-            >
-              <span className="text-lg leading-none">🇬🇧</span> English
-            </button>
-          </div>
         </div>
 
         {error && (
@@ -167,14 +210,14 @@ export default function RegisterPage() {
           disabled={loading}
           className="w-full rounded bg-ink text-white text-sm font-medium py-2.5 hover:bg-black transition-colors disabled:opacity-60"
         >
-          {loading ? "Création..." : "Créer mon compte"}
+          {loading ? t.submitLoading : t.submit}
         </button>
       </form>
 
       <p className="text-sm text-muted mt-6 text-center">
-        Déjà inscrit ?{" "}
+        {t.alreadyRegistered}{" "}
         <Link href="/login" className="text-brand font-medium hover:underline">
-          Se connecter
+          {t.loginLink}
         </Link>
       </p>
     </AuthShell>
