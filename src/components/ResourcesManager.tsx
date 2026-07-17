@@ -11,6 +11,7 @@ const typeLabels: Record<ResourceType, string> = {
   vehicle: "Véhicule",
   equipment: "Matériel",
   other: "Autre",
+  customType: "",
 };
 
 const emptyForm = {
@@ -42,11 +43,9 @@ export default function ResourcesManager({ initialResources }: { initialResource
       body: JSON.stringify({
         ...form,
         capacity: form.capacity === "" ? null : Number(form.capacity),
-        equipment: form.equipment
-          .split(",")
-          .map((e) => e.trim())
-          .filter(Boolean),
-      }),
+        custom_type: form.type === "other" ? form.customType.trim() || null : null,
+        equipment: form.equipment.split(",").map((e) => e.trim()).filter(Boolean),
+      }),  
     });
     setLoading(false);
     if (!res.ok) {
