@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react";
 
+const positiveMessages = [
+  "Chaque ressource a sa place. Chaque équipe trouve la sienne.",
+  "Salles, bureaux, parkings, véhicules, matériel : un seul endroit pour tout gérer.",
+  "Moins de temps à chercher une ressource, plus de temps pour ce qui compte.",
+];
+
 export default function AuthShell({
   title,
   subtitle,
@@ -11,63 +17,56 @@ export default function AuthShell({
   subtitle: string;
   children: React.ReactNode;
 }) {
-  const [now, setNow] = useState(new Date());
+  const [messageIndex, setMessageIndex] = useState(0);
 
   useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 1000 * 30);
+    const t = setInterval(() => {
+      setMessageIndex((i) => (i + 1) % positiveMessages.length);
+    }, 4500);
     return () => clearInterval(t);
   }, []);
 
-  const hours = now.getHours() + now.getMinutes() / 60;
-  const dayStart = 8;
-  const dayEnd = 19;
-  const progress = Math.min(1, Math.max(0, (hours - dayStart) / (dayEnd - dayStart)));
-
-  const slots = [
-    { label: "9:00", room: "Atlas", busy: true },
-    { label: "10:30", room: "Everest", busy: false },
-    { label: "13:00", room: "Kilimandjaro", busy: true },
-    { label: "15:00", room: "Atlas", busy: false },
-    { label: "16:30", room: "Everest", busy: true },
-  ];
-
   return (
     <div className="min-h-screen flex">
-      <div className="hidden lg:flex lg:w-1/2 bg-ink text-white flex-col justify-between p-12 relative overflow-hidden">
-        <div>
-          <div className="text-sm tracking-widest uppercase text-white/50 mb-1">RoomFlow</div>
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-brand to-brand-dark text-white flex-col justify-between p-12 relative overflow-hidden">
+        {/* touches de couleur en fond, discrètes */}
+        <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 left-0 h-64 w-64 rounded-full bg-black/10 blur-3xl" />
+
+        <div className="relative">
+          <div className="text-sm tracking-widest uppercase text-white/60 mb-1">ResourcesFlow</div>
           <h1 className="font-display text-3xl italic leading-tight">
-            Réserver une salle
+            Toutes vos ressources,
             <br />
-            ne devrait prendre
+            un seul planning,
             <br />
-            que dix secondes.
+            zéro friction.
           </h1>
         </div>
 
-        <div className="space-y-3">
-          <div className="text-xs uppercase tracking-widest text-white/40 mb-2">Planning du jour</div>
-          <div className="relative border-l border-white/15 pl-4 space-y-3">
-            <div
-              className="absolute -left-[3px] w-1.5 h-1.5 rounded-full bg-brand"
-              style={{ top: `${progress * 100}%` }}
-              aria-hidden
-            />
-            {slots.map((s) => (
-              <div key={s.label} className="flex items-center gap-3 text-sm">
-                <span className="font-mono text-white/50 w-12">{s.label}</span>
-                <span
-                  className={`h-2 w-2 rounded-full ${s.busy ? "bg-occupied" : "bg-brand"}`}
-                  aria-hidden
-                />
-                <span className="text-white/80">{s.room}</span>
-                <span className="text-white/40 text-xs ml-auto">{s.busy ? "occupée" : "libre"}</span>
-              </div>
+        <div className="relative space-y-4">
+          <div className="text-xs uppercase tracking-widest text-white/50">En un mot</div>
+          <p
+            key={messageIndex}
+            className="text-lg font-medium text-white/95 leading-relaxed transition-opacity duration-500"
+          >
+            {positiveMessages[messageIndex]}
+          </p>
+          <div className="flex gap-1.5 pt-1">
+            {positiveMessages.map((_, i) => (
+              <span
+                key={i}
+                className={`h-1.5 rounded-full transition-all ${
+                  i === messageIndex ? "w-6 bg-white" : "w-1.5 bg-white/30"
+                }`}
+              />
             ))}
           </div>
         </div>
 
-        <p className="text-xs text-white/30">Mise à jour en temps réel · toutes les salles, un seul planning.</p>
+        <p className="relative text-xs text-white/50">
+          Multi-sociétés, multi-ressources · vos données restent isolées et confidentielles.
+        </p>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-6 bg-paper">
