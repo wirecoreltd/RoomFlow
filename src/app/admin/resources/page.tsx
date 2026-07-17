@@ -1,12 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
 import ResourcesManager from "@/components/ResourcesManager";
-import type { Resource } from "@/lib/types";
+import type { Resource, CustomType } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminResourcesPage() {
   const supabase = createClient();
-  const { data: resources } = await supabase.from("resources").select("*").order("name");
+  const [{ data: resources }, { data: customTypes }] = await Promise.all([
+    supabase.from("resources").select("*").order("name"),
+    supabase.from("custom_types").select("*").order("name"),
+  ]);
+
   return (
     <div className="space-y-6">
       <div>
@@ -15,7 +19,10 @@ export default async function AdminResourcesPage() {
           Ajoutez des salles, bureaux, parkings, véhicules ou matériel, et définissez leurs horaires.
         </p>
       </div>
-      <ResourcesManager initialResources={(resources as Resource[]) ?? []} />
+      <ResourcesManager
+        initialResources={(resources as Resource[]) ?? []}
+        initialCustomTypes={(customTypes as CustomType[]) ?? []}
+      />
     </div>
   );
 }
