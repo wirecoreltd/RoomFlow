@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { cn, formatTime, initials } from "@/lib/utils";
-import type { Booking, Room } from "@/lib/types";
+import { formatTime, initials } from "@/lib/utils";
+import type { Booking, Resource } from "@/lib/types";
 import BookingModal from "@/components/BookingModal";
 
 const HOUR_HEIGHT = 64; // px per hour
@@ -15,30 +15,30 @@ function timeToMinutes(t: string) {
 
 export default function PlanningGrid({
   dateKey,
-  rooms,
+  resources,
   initialBookings,
   currentUserId,
+  isAdmin,
 }: {
   dateKey: string;
-  rooms: Room[];
+  resources: Resource[];
   initialBookings: Booking[];
   currentUserId: string;
+  isAdmin: boolean;
 }) {
   const supabase = createClient();
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
-  const [draft, setDraft] = useState<{ roomId: string; start: Date; end: Date } | null>(null);
+  const [draft, setDraft] = useState<{ resourceId: string; start: Date; end: Date } | null>(null);
   const [selected, setSelected] = useState<Booking | null>(null);
   const [now, setNow] = useState(new Date());
 
   useEffect(() => setBookings(initialBookings), [initialBookings]);
 
-  // Live clock, updated every minute, drives the "now" line.
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(t);
   }, []);
 
-  // Realtime sync: any insert/update/delete on bookings refreshes this view.
   useEffect(() => {
     const channel = supabase
       .channel("bookings-realtime")
@@ -61,12 +61,12 @@ export default function PlanningGrid({
     };
   }, [dateKey, supabase]);
 
-  const dayStartMin = rooms.length
-    ? Math.min(...rooms.map((r) => timeToMinutes(r.opening_time))) - 30
+  const dayStartMin = resources.length
+    ? Math.min(...resources.map((r) => timeToMinutes(r.opening_time))) - 30
     : 8 * 60;
-  const dayEndMin = rooms.length
-    ? Math.max(...rooms.map((r) => timeToMinutes(r.closing_time)))
-    : 19 * 60;
+  const dayEndMin = resources.length
+    ? Math.max(...resources.map((r) => timeToMinutes(r.closing_time)))
+    : 23 * 60;
   const totalMinutes = Math.max(60, dayEndMin - dayStartMin);
   const totalHeight = (totalMinutes / 60) * HOUR_HEIGHT;
 
@@ -80,11 +80,11 @@ export default function PlanningGrid({
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const nowTop = ((nowMinutes - dayStartMin) / totalMinutes) * totalHeight;
 
-  function bookingsForRoom(roomId: string) {
-    return bookings.filter((b) => b.room_id === roomId);
+  function bookingsForResource(resourceId: string) {
+    return bookings.filter((b) => b.resource_id === resourceId);
   }
 
-  function handleColumnClick(room: Room, e: React.MouseEvent<HTMLDivElement>) {
+  function handleColumnClick(resource: Resource, e: React.MouseEvent<HTMLDivElement>) {
     const rect = e.currentTarget.getBoundingClientRect();
     const offsetY = e.clientY - rect.top;
     const rawMinutes = dayStartMin + (offsetY / totalHeight) * totalMinutes;
@@ -93,14 +93,14 @@ export default function PlanningGrid({
     start.setMinutes(snapped);
     const end = new Date(start);
     end.setMinutes(start.getMinutes() + 60);
-    setDraft({ roomId: room.id, start, end });
+    setDraft({ resourceId: resource.id, start, end });
   }
 
-  if (rooms.length === 0) {
+  if (resources.length === 0) {
     return (
       <div className="rounded-lg border border-line bg-surface p-10 text-center text-muted">
-        Aucune salle n&apos;est configurée pour le moment. Un administrateur doit en ajouter depuis{" "}
-        <span className="font-medium text-text">Salles</span>.
+        Aucune ressource n&apos;est configurée pour le moment. Un administrateur doit en ajouter depuis{" "}
+        <span className="font-medium text-text">Ressources</span>.
       </div>
     );
   }
@@ -109,25 +109,23 @@ export default function PlanningGrid({
     <div className="rounded-lg border border-line bg-surface overflow-hidden">
       <div className="overflow-x-auto scrollbar-thin">
         <div className="min-w-[720px]">
-          {/* Header row: room names */}
-          <div className="grid border-b border-line" style={{ gridTemplateColumns: `64px repeat(${rooms.length}, 1fr)` }}>
+          <div className="grid border-b border-line" style={{ gridTemplateColumns: `64px repeat(${resources.length}, 1fr)` }}>
             <div />
-            {rooms.map((room) => (
-              <div key={room.id} className="px-3 py-3 border-l border-line">
+            {resources.map((resource) => (
+              <div key={resource.id} className="px-3 py-3 border-l border-line">
                 <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: room.color }} />
-                  <span className="font-medium text-sm">{room.name}</span>
+                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: resource.color }} />
+                  <span className="font-medium text-sm">{resource.name}</span>
                 </div>
                 <div className="text-xs text-muted mt-0.5">
-                  {room.capacity} pers. {room.location ? `· ${room.location}` : ""}
+                  {resource.capacity ? `${resource.capacity} pers. ` : ""}
+                  {resource.location ? `· ${resource.location}` : ""}
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Grid body */}
-          <div className="grid relative" style={{ gridTemplateColumns: `64px repeat(${rooms.length}, 1fr)` }}>
-            {/* Hour labels */}
+          <div className="grid relative" style={{ gridTemplateColumns: `64px repeat(${resources.length}, 1fr)` }}>
             <div className="relative" style={{ height: totalHeight }}>
               {hourMarks.map((m) => (
                 <div
@@ -140,14 +138,13 @@ export default function PlanningGrid({
               ))}
             </div>
 
-            {rooms.map((room) => (
+            {resources.map((resource) => (
               <div
-                key={room.id}
+                key={resource.id}
                 className="relative border-l border-line cursor-crosshair"
                 style={{ height: totalHeight }}
-                onClick={(e) => handleColumnClick(room, e)}
+                onClick={(e) => handleColumnClick(resource, e)}
               >
-                {/* hour gridlines */}
                 {hourMarks.map((m) => (
                   <div
                     key={m}
@@ -156,21 +153,20 @@ export default function PlanningGrid({
                   />
                 ))}
 
-                {/* closed hours shading */}
                 <div
                   className="absolute left-0 right-0 top-0 bg-black/[0.03]"
-                  style={{ height: ((timeToMinutes(room.opening_time) - dayStartMin) / totalMinutes) * totalHeight }}
+                  style={{ height: ((timeToMinutes(resource.opening_time) - dayStartMin) / totalMinutes) * totalHeight }}
                 />
                 <div
                   className="absolute left-0 right-0 bottom-0 bg-black/[0.03]"
                   style={{
                     height:
                       totalHeight -
-                      ((timeToMinutes(room.closing_time) - dayStartMin) / totalMinutes) * totalHeight,
+                      ((timeToMinutes(resource.closing_time) - dayStartMin) / totalMinutes) * totalHeight,
                   }}
                 />
 
-                {bookingsForRoom(room.id).map((b) => {
+                {bookingsForResource(resource.id).map((b) => {
                   const start = new Date(b.start_time);
                   const end = new Date(b.end_time);
                   const startMin = start.getHours() * 60 + start.getMinutes();
@@ -186,7 +182,7 @@ export default function PlanningGrid({
                         setSelected(b);
                       }}
                       className="absolute left-1 right-1 rounded px-2 py-1 text-left text-white text-xs shadow-sm overflow-hidden hover:brightness-95 transition-all"
-                      style={{ top, height, backgroundColor: room.color }}
+                      style={{ top, height, backgroundColor: resource.color }}
                     >
                       <div className="font-medium truncate">{b.title}</div>
                       <div className="opacity-80 truncate">
@@ -199,7 +195,6 @@ export default function PlanningGrid({
               </div>
             ))}
 
-            {/* "now" line across all rooms, today only */}
             {isToday && nowMinutes >= dayStartMin && nowMinutes <= dayEndMin && (
               <div
                 className="absolute left-16 right-0 flex items-center pointer-events-none"
@@ -217,8 +212,8 @@ export default function PlanningGrid({
 
       {draft && (
         <BookingModal
-          rooms={rooms}
-          initialRoomId={draft.roomId}
+          resources={resources}
+          initialResourceId={draft.resourceId}
           initialStart={draft.start}
           initialEnd={draft.end}
           onClose={() => setDraft(null)}
@@ -228,9 +223,9 @@ export default function PlanningGrid({
 
       {selected && (
         <BookingModal
-          rooms={rooms}
+          resources={resources}
           viewBooking={selected}
-          canManage={selected.user_id === currentUserId}
+          canManage={selected.user_id === currentUserId || isAdmin}
           onClose={() => setSelected(null)}
           onCancelled={() => setSelected(null)}
         />
