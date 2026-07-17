@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Booking, Room } from "@/lib/types";
+import type { Booking, Resource } from "@/lib/types";
 import { formatTime } from "@/lib/utils";
 
 function toLocalInput(date: Date) {
@@ -13,8 +13,8 @@ function toLocalInput(date: Date) {
 }
 
 export default function BookingModal({
-  rooms,
-  initialRoomId,
+  resources,
+  initialResourceId,
   initialStart,
   initialEnd,
   viewBooking,
@@ -23,8 +23,8 @@ export default function BookingModal({
   onCreated,
   onCancelled,
 }: {
-  rooms: Room[];
-  initialRoomId?: string;
+  resources: Resource[];
+  initialResourceId?: string;
   initialStart?: Date;
   initialEnd?: Date;
   viewBooking?: Booking;
@@ -36,7 +36,7 @@ export default function BookingModal({
   const router = useRouter();
   const isViewMode = !!viewBooking;
 
-  const [roomId, setRoomId] = useState(initialRoomId ?? rooms[0]?.id ?? "");
+  const [resourceId, setResourceId] = useState(initialResourceId ?? resources[0]?.id ?? "");
   const [start, setStart] = useState(initialStart ? toLocalInput(initialStart) : "");
   const [end, setEnd] = useState(initialEnd ? toLocalInput(initialEnd) : "");
   const [title, setTitle] = useState("");
@@ -55,7 +55,7 @@ export default function BookingModal({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        room_id: roomId,
+        resource_id: resourceId,
         title,
         start_time: new Date(start).toISOString(),
         end_time: new Date(end).toISOString(),
@@ -88,6 +88,8 @@ export default function BookingModal({
     onCancelled?.();
   }
 
+  const viewResource = viewBooking ? resources.find((r) => r.id === viewBooking.resource_id) : undefined;
+
   return (
     <div
       className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
@@ -102,7 +104,7 @@ export default function BookingModal({
             <h3 className="font-display text-xl mb-1">{viewBooking.title}</h3>
             <p className="text-sm text-muted mb-4">
               {formatTime(viewBooking.start_time)} – {formatTime(viewBooking.end_time)} ·{" "}
-              {rooms.find((r) => r.id === viewBooking.room_id)?.name}
+              {viewResource?.name}
             </p>
             <p className="text-sm text-text mb-6">
               Organisé par <strong>{viewBooking.organizer?.full_name ?? "—"}</strong>
@@ -132,15 +134,16 @@ export default function BookingModal({
 
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium mb-1">Salle</label>
+                <label className="block text-sm font-medium mb-1">Ressource</label>
                 <select
-                  value={roomId}
-                  onChange={(e) => setRoomId(e.target.value)}
+                  value={resourceId}
+                  onChange={(e) => setResourceId(e.target.value)}
                   className="w-full rounded border border-line px-3 py-2 text-sm"
                 >
-                  {rooms.map((r) => (
+                  {resources.map((r) => (
                     <option key={r.id} value={r.id}>
-                      {r.name} ({r.capacity} pers.)
+                      {r.name}
+                      {r.capacity ? ` (${r.capacity} pers.)` : ""}
                     </option>
                   ))}
                 </select>
