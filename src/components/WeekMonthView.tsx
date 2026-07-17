@@ -2,31 +2,31 @@
 
 import { useRouter } from "next/navigation";
 import { toDateKey } from "@/lib/utils";
-import type { Booking, Room } from "@/lib/types";
+import type { Booking, Resource } from "@/lib/types";
 
 export default function WeekMonthView({
-  rooms,
+  resources,
   bookings,
   days,
 }: {
-  rooms: Room[];
+  resources: Resource[];
   bookings: Booking[];
   days: Date[];
 }) {
   const router = useRouter();
 
-  if (rooms.length === 0) {
+  if (resources.length === 0) {
     return (
       <div className="rounded-lg border border-line bg-surface p-10 text-center text-muted">
-        Aucune salle n&apos;est configuree pour le moment. Un administrateur doit en ajouter depuis{" "}
-        <span className="font-medium text-text">Salles</span>.
+        Aucune ressource n&apos;est configurée pour le moment. Un administrateur doit en ajouter depuis{" "}
+        <span className="font-medium text-text">Ressources</span>.
       </div>
     );
   }
 
-  function bookingsFor(roomId: string, day: Date) {
+  function bookingsFor(resourceId: string, day: Date) {
     const key = toDateKey(day);
-    return bookings.filter((b) => b.room_id === roomId && b.start_time.slice(0, 10) === key);
+    return bookings.filter((b) => b.resource_id === resourceId && b.start_time.slice(0, 10) === key);
   }
 
   function goToDay(day: Date) {
@@ -42,7 +42,7 @@ export default function WeekMonthView({
           <thead>
             <tr>
               <th className="text-left text-xs font-medium text-muted px-3 py-3 border-b border-line w-40">
-                Salle
+                Ressource
               </th>
               {days.map((day) => {
                 const key = toDateKey(day);
@@ -60,16 +60,16 @@ export default function WeekMonthView({
             </tr>
           </thead>
           <tbody>
-            {rooms.map((room) => (
-              <tr key={room.id}>
+            {resources.map((resource) => (
+              <tr key={resource.id}>
                 <td className="px-3 py-3 border-b border-line">
                   <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: room.color }} />
-                    <span className="font-medium text-sm">{room.name}</span>
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: resource.color }} />
+                    <span className="font-medium text-sm">{resource.name}</span>
                   </div>
                 </td>
                 {days.map((day) => {
-                  const dayBookings = bookingsFor(room.id, day);
+                  const dayBookings = bookingsFor(resource.id, day);
                   const key = toDateKey(day);
                   return (
                     <td
@@ -82,7 +82,7 @@ export default function WeekMonthView({
                       ) : (
                         <span
                           className="text-xs font-medium rounded-full px-2 py-0.5 text-white inline-block"
-                          style={{ backgroundColor: room.color }}
+                          style={{ backgroundColor: resource.color }}
                         >
                           {dayBookings.length} resa.
                         </span>
