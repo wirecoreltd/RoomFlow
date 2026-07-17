@@ -8,10 +8,9 @@ export default async function AdminBookingsPage() {
   const supabase = createClient();
   const { data: bookings } = await supabase
     .from("bookings")
-    .select("*, room:rooms(*), organizer:profiles(*)")
+    .select("*, resource:resources(*), organizer:profiles(*)")
     .order("start_time", { ascending: false })
     .limit(200);
-
   return (
     <div className="space-y-6">
       <div>
