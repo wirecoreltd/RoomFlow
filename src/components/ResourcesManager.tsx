@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import type { Resource, ResourceType } from "@/lib/types";
 
@@ -11,7 +11,6 @@ const typeLabels: Record<ResourceType, string> = {
   vehicle: "Véhicule",
   equipment: "Matériel",
   other: "Autre",
-  customType: "",
 };
 
 const emptyForm = {
@@ -23,6 +22,7 @@ const emptyForm = {
   opening_time: "08:00",
   closing_time: "23:00",
   equipment: "",
+  customType: "",
 };
 
 export default function ResourcesManager({ initialResources }: { initialResources: Resource[] }) {
@@ -32,6 +32,14 @@ export default function ResourcesManager({ initialResources }: { initialResource
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const existingCustomTypes = useMemo(
+    () =>
+      Array.from(
+        new Set(resources.filter((r) => r.type === "other" && r.custom_type).map((r) => r.custom_type as string))
+      ).sort(),
+    [resources]
+  );
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -44,8 +52,11 @@ export default function ResourcesManager({ initialResources }: { initialResource
         ...form,
         capacity: form.capacity === "" ? null : Number(form.capacity),
         custom_type: form.type === "other" ? form.customType.trim() || null : null,
-        equipment: form.equipment.split(",").map((e) => e.trim()).filter(Boolean),
-      }),  
+        equipment: form.equipment
+          .split(",")
+          .map((e) => e.trim())
+          .filter(Boolean),
+      }),
     });
     setLoading(false);
     if (!res.ok) {
@@ -102,6 +113,26 @@ export default function ResourcesManager({ initialResources }: { initialResource
                 ))}
               </select>
             </div>
+
+            {form.type === "other" && (
+              <div>
+                <label className="block text-sm font-medium mb-1">Préciser le type</label>
+                <input
+                  required
+                  list="custom-types"
+                  value={form.customType}
+                  onChange={(e) => setForm({ ...form, customType: e.target.value })}
+                  className="w-full rounded border border-line px-3 py-2 text-sm"
+                  placeholder="Ex : Casier, Badge, Salle de sport"
+                />
+                <datalist id="custom-types">
+                  {existingCustomTypes.map((t) => (
+                    <option key={t} value={t} />
+                  ))}
+                </datalist>
+              </div>
+            )}
+
             <div>
               <label className="block text-sm font-medium mb-1">Nom</label>
               <input
@@ -189,7 +220,9 @@ export default function ResourcesManager({ initialResources }: { initialResource
               <div>
                 <div className="text-sm font-medium">
                   {resource.name}{" "}
-                  <span className="text-xs text-muted font-normal">({typeLabels[resource.type]})</span>
+                  <span className="text-xs text-muted font-normal">
+                    ({resource.type === "other" ? resource.custom_type || "Autre" : typeLabels[resource.type]})
+                  </span>
                 </div>
                 <div className="text-xs text-muted">
                   {resource.capacity ? `${resource.capacity} pers. · ` : ""}
