@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import AuthShell, { type Language } from "@/components/AuthShell";
+import { usePersistedLanguage } from "@/hooks/useLanguage";
 
 const pageText: Record<
   Language,
@@ -55,7 +56,7 @@ export default function LoginPage() {
   const supabase = createClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [language, setLanguage] = useState<Language>("fr");
+  const [language, setLanguage] = usePersistedLanguage();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
