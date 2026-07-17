@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Building2,
   Armchair,
-  CircleParking,
+  ParkingSquare,
   Car,
   Wrench,
   Printer,
@@ -55,7 +55,7 @@ const typeConfig: Record<ResourceType, TypeConfig> = {
     hasSchedule: true,
     hasCapacity: false,
     color: "#D97706",
-    Icon: CircleParking,
+    Icon: ParkingSquare,
   },
   vehicle: {
     label: { fr: "Véhicule", en: "Vehicle" },
