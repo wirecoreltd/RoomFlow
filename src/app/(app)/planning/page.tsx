@@ -3,7 +3,7 @@ import PlanningGrid from "@/components/PlanningGrid";
 import WeekMonthView from "@/components/WeekMonthView";
 import DateNav, { type PlanningView } from "@/components/DateNav";
 import { addDays, startOfWeek, startOfMonth, endOfMonth, toDateKey } from "@/lib/utils";
-import type { Booking, Room } from "@/lib/types";
+import type { Booking, Resource } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -17,9 +17,18 @@ export default async function PlanningPage({
     data: { user },
   } = await supabase.auth.getUser();
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user?.id ?? "")
+    .single();
+  const isAdmin = profile?.role === "admin";
+
   const requestedView = searchParams.view;
   const view: PlanningView =
-    requestedView === "week" || requestedView === "month" ? requestedView : "day";
+    requestedView === "day" || requestedView === "week" || requestedView === "month"
+      ? requestedView
+      : "month";
 
   const dateKey = searchParams.date ?? toDateKey(new Date());
   const current = new Date(`${dateKey}T00:00:00`);
@@ -48,8 +57,8 @@ export default async function PlanningPage({
     rangeEnd.setHours(23, 59, 59);
   }
 
-  const [{ data: rooms }, { data: bookings }] = await Promise.all([
-    supabase.from("rooms").select("*").eq("is_active", true).order("name"),
+  const [{ data: resources }, { data: bookings }] = await Promise.all([
+    supabase.from("resources").select("*").eq("is_active", true).order("name"),
     supabase
       .from("bookings")
       .select("*, organizer:profiles(*)")
@@ -68,7 +77,7 @@ export default async function PlanningPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="font-display text-2xl">Planning des salles</h1>
+          <h1 className="font-display text-2xl">Planning des ressources</h1>
           <p className="text-sm text-muted">{subtitle}</p>
         </div>
         <DateNav dateKey={dateKey} view={view} />
@@ -77,12 +86,17 @@ export default async function PlanningPage({
       {view === "day" ? (
         <PlanningGrid
           dateKey={dateKey}
-          rooms={(rooms as Room[]) ?? []}
+          resources={(resources as Resource[]) ?? []}
           initialBookings={(bookings as Booking[]) ?? []}
           currentUserId={user?.id ?? ""}
+          isAdmin={isAdmin}
         />
       ) : (
-        <WeekMonthView rooms={(rooms as Room[]) ?? []} bookings={(bookings as Booking[]) ?? []} days={days} />
+        <WeekMonthView
+          resources={(resources as Resource[]) ?? []}
+          bookings={(bookings as Booking[]) ?? []}
+          days={days}
+        />
       )}
     </div>
   );
