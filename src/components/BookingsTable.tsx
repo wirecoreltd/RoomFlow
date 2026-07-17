@@ -9,7 +9,6 @@ export default function BookingsTable({ initialBookings }: { initialBookings: Bo
   const router = useRouter();
   const [bookings, setBookings] = useState(initialBookings);
   const [filter, setFilter] = useState<"all" | "upcoming" | "past" | "cancelled">("upcoming");
-
   const now = new Date();
   const filtered = bookings.filter((b) => {
     if (filter === "cancelled") return b.status === "cancelled";
@@ -42,14 +41,13 @@ export default function BookingsTable({ initialBookings }: { initialBookings: Bo
           </button>
         ))}
       </div>
-
       <div className="rounded-lg border border-line bg-surface overflow-x-auto scrollbar-thin">
         <table className="w-full text-sm min-w-[720px]">
           <thead>
             <tr className="border-b border-line text-left text-xs text-muted uppercase tracking-wide">
               <th className="px-4 py-3 font-medium">Date</th>
               <th className="px-4 py-3 font-medium">Horaire</th>
-              <th className="px-4 py-3 font-medium">Salle</th>
+              <th className="px-4 py-3 font-medium">Ressource</th>
               <th className="px-4 py-3 font-medium">Motif</th>
               <th className="px-4 py-3 font-medium">Organisateur</th>
               <th className="px-4 py-3 font-medium" />
@@ -62,7 +60,7 @@ export default function BookingsTable({ initialBookings }: { initialBookings: Bo
                 <td className="px-4 py-3 font-mono text-xs">
                   {formatTime(b.start_time)}–{formatTime(b.end_time)}
                 </td>
-                <td className="px-4 py-3">{b.room?.name ?? "—"}</td>
+                <td className="px-4 py-3">{b.resource?.name ?? "—"}</td>
                 <td className="px-4 py-3">{b.title}</td>
                 <td className="px-4 py-3">{b.organizer?.full_name ?? "—"}</td>
                 <td className="px-4 py-3 text-right">
