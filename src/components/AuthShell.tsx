@@ -56,30 +56,32 @@ export default function AuthShell({
 
   return (
     <div className="min-h-screen flex relative">
-      <div className="absolute top-4 right-4 sm:right-6 z-20 flex gap-2">
+      <div className="absolute top-4 right-4 sm:right-6 z-20 flex gap-3">
         <button
           type="button"
           onClick={() => setLang("fr")}
           aria-label="Français"
-          className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium backdrop-blur-sm transition-colors ${
+          title="Français"
+          className={`flex items-center justify-center h-14 w-14 sm:h-16 sm:w-16 rounded-xl border-2 shadow-sm backdrop-blur-sm transition-all ${
             lang === "fr"
-              ? "border-brand bg-brand-light text-brand-dark"
-              : "border-line/60 bg-white/70 text-muted hover:border-brand/40"
+              ? "border-brand bg-white scale-105 shadow-md"
+              : "border-line/50 bg-white/70 opacity-70 hover:opacity-100 hover:scale-105"
           }`}
         >
-          <span className="text-base leading-none">🇫🇷</span> FR
+          <span className="text-3xl sm:text-4xl leading-none">🇫🇷</span>
         </button>
         <button
           type="button"
           onClick={() => setLang("en")}
           aria-label="English"
-          className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium backdrop-blur-sm transition-colors ${
+          title="English"
+          className={`flex items-center justify-center h-14 w-14 sm:h-16 sm:w-16 rounded-xl border-2 shadow-sm backdrop-blur-sm transition-all ${
             lang === "en"
-              ? "border-brand bg-brand-light text-brand-dark"
-              : "border-line/60 bg-white/70 text-muted hover:border-brand/40"
+              ? "border-brand bg-white scale-105 shadow-md"
+              : "border-line/50 bg-white/70 opacity-70 hover:opacity-100 hover:scale-105"
           }`}
         >
-          <span className="text-base leading-none">🇬🇧</span> EN
+          <span className="text-3xl sm:text-4xl leading-none">🇬🇧</span>
         </button>
       </div>
 
