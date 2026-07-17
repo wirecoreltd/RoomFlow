@@ -14,7 +14,6 @@ export type Profile = {
   language: Language;
   created_at: string;
 };
-export type ResourceType = "room" | "desk" | "parking" | "vehicle" | "equipment" | "other";
 export type ResourceType =
   | "room"
   | "desk"
@@ -25,14 +24,12 @@ export type ResourceType =
   | "tv"
   | "projector"
   | "other";
-
 export type CustomType = {
   id: string;
   company_id: string;
   name: string;
   created_at: string;
 };
-
 export type Resource = {
   id: string;
   company_id: string;
