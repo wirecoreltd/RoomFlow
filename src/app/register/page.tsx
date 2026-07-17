@@ -6,12 +6,16 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import AuthShell from "@/components/AuthShell";
 
+type Language = "fr" | "en";
+
 export default function RegisterPage() {
   const router = useRouter();
   const supabase = createClient();
   const [fullName, setFullName] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [language, setLanguage] = useState<Language>("fr");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -23,11 +27,21 @@ export default function RegisterPage() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } },
+      options: {
+        data: {
+          full_name: fullName,
+          company_name: companyName,
+          language,
+        },
+      },
     });
     setLoading(false);
     if (error) {
-      setError(error.message === "User already registered" ? "Un compte existe déjà avec cet email." : "Impossible de créer le compte. Réessayez.");
+      setError(
+        error.message === "User already registered"
+          ? "Un compte existe déjà avec cet email."
+          : "Impossible de créer le compte. Réessayez."
+      );
       return;
     }
     setDone(true);
@@ -50,8 +64,25 @@ export default function RegisterPage() {
   }
 
   return (
-    <AuthShell title="Créer un compte" subtitle="Réservez vos salles de réunion en quelques secondes.">
+    <AuthShell title="Créer un compte" subtitle="Réservez vos ressources en quelques secondes.">
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-text mb-1" htmlFor="companyName">
+            Nom de la société
+          </label>
+          <input
+            id="companyName"
+            required
+            value={companyName}
+            onChange={(e) => setCompanyName(e.target.value)}
+            className="w-full rounded border border-line bg-surface px-3 py-2 text-sm focus:border-brand outline-none"
+            placeholder="Acme SARL"
+          />
+          <p className="text-xs text-muted mt-1">
+            Un espace privé sera créé pour votre société. Vos données ne seront jamais visibles par les autres sociétés.
+          </p>
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-text mb-1" htmlFor="fullName">
             Nom complet
@@ -65,6 +96,7 @@ export default function RegisterPage() {
             placeholder="Marie Dupont"
           />
         </div>
+
         <div>
           <label className="block text-sm font-medium text-text mb-1" htmlFor="email">
             Email professionnel
@@ -79,6 +111,7 @@ export default function RegisterPage() {
             placeholder="prenom.nom@entreprise.com"
           />
         </div>
+
         <div>
           <label className="block text-sm font-medium text-text mb-1" htmlFor="password">
             Mot de passe
@@ -93,6 +126,34 @@ export default function RegisterPage() {
             className="w-full rounded border border-line bg-surface px-3 py-2 text-sm focus:border-brand outline-none"
             placeholder="6 caractères minimum"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-text mb-2">Langue de l&apos;application</label>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setLanguage("fr")}
+              className={`flex items-center justify-center gap-2 rounded border px-3 py-2.5 text-sm font-medium transition-colors ${
+                language === "fr"
+                  ? "border-brand bg-brand-light text-brand-dark"
+                  : "border-line text-muted hover:border-brand/40"
+              }`}
+            >
+              <span className="text-lg leading-none">🇫🇷</span> Français
+            </button>
+            <button
+              type="button"
+              onClick={() => setLanguage("en")}
+              className={`flex items-center justify-center gap-2 rounded border px-3 py-2.5 text-sm font-medium transition-colors ${
+                language === "en"
+                  ? "border-brand bg-brand-light text-brand-dark"
+                  : "border-line text-muted hover:border-brand/40"
+              }`}
+            >
+              <span className="text-lg leading-none">🇬🇧</span> English
+            </button>
+          </div>
         </div>
 
         {error && (
