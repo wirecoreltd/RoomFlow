@@ -1,5 +1,4 @@
 "use client";
-
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -16,7 +15,7 @@ export default function Navbar({ profile }: { profile: Profile | null }) {
     ...(profile?.role === "admin"
       ? [
           { href: "/admin", label: "Tableau de bord" },
-          { href: "/admin/rooms", label: "Salles" },
+          { href: "/admin/resources", label: "Ressources" },
           { href: "/admin/bookings", label: "Réservations" },
           { href: "/admin/users", label: "Utilisateurs" },
         ]
@@ -51,7 +50,6 @@ export default function Navbar({ profile }: { profile: Profile | null }) {
             ))}
           </nav>
         </div>
-
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-2 text-sm text-muted">
             <span className="h-7 w-7 rounded-full bg-brand-light text-brand-dark flex items-center justify-center text-xs font-semibold">
