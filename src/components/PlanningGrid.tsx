@@ -5,8 +5,21 @@ import { createClient } from "@/lib/supabase/client";
 import { formatTime, initials } from "@/lib/utils";
 import type { Booking, Resource } from "@/lib/types";
 import BookingModal from "@/components/BookingModal";
+import { usePersistedLanguage } from "@/hooks/useLanguage";
 
 const HOUR_HEIGHT = 64; // px per hour
+
+type Language = "fr" | "en";
+const gridText: Record<Language, { empty: string; emptyLink: string }> = {
+  fr: {
+    empty: "Aucune ressource n'est configurée pour le moment. Un administrateur doit en ajouter depuis",
+    emptyLink: "Ressources",
+  },
+  en: {
+    empty: "No resource is configured yet. An administrator needs to add one from",
+    emptyLink: "Resources",
+  },
+};
 
 function timeToMinutes(t: string) {
   const [h, m] = t.split(":").map(Number);
