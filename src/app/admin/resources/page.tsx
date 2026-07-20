@@ -12,17 +12,9 @@ export default async function AdminResourcesPage() {
   ]);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl">Gestion des ressources</h1>
-        <p className="text-sm text-muted">
-          Ajoutez des salles, bureaux, parkings, véhicules ou matériel, et définissez leurs horaires.
-        </p>
-      </div>
-      <ResourcesManager
-        initialResources={(resources as Resource[]) ?? []}
-        initialCustomTypes={(customTypes as CustomType[]) ?? []}
-      />
-    </div>
+    <ResourcesManager
+      initialResources={(resources as Resource[]) ?? []}
+      initialCustomTypes={(customTypes as CustomType[]) ?? []}
+    />
   );
 }
