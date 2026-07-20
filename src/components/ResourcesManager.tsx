@@ -423,7 +423,7 @@ export default function ResourcesManager({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="p-6 sm:p-8 space-y-8 max-w-6xl mx-auto">
       {/* En-tête */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -432,40 +432,33 @@ export default function ResourcesManager({
         </div>
         <button
           onClick={() => (showForm ? setShowForm(false) : openCreateForm())}
-          className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-brand/20 hover:bg-brand-dark transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-2 text-sm font-medium text-white hover:bg-brand-dark transition-colors"
         >
-          {showForm ? <X size={16} /> : <Plus size={16} />}
+          {showForm ? <X size={15} /> : <Plus size={15} />}
           {showForm ? t.closeButton : t.addButton}
         </button>
       </div>
 
       {/* Bandeau de statistiques */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="rounded-2xl bg-surface px-5 py-4 border border-line shadow-sm">
+      <div className="grid grid-cols-3 gap-4">
+        <div className="rounded-xl bg-surface px-5 py-4 border border-line">
           <p className="text-xs font-medium text-muted flex items-center gap-1.5">
             <LayoutGrid size={13} /> {t.statTotal}
           </p>
-          <p className="text-3xl font-semibold text-ink mt-2">{resources.length}</p>
+          <p className="text-2xl font-semibold text-ink mt-1.5">{resources.length}</p>
         </div>
-        <div className="rounded-2xl bg-emerald-50 border border-emerald-100 px-5 py-4 shadow-sm">
+        <div className="rounded-xl bg-emerald-50 border border-emerald-100 px-5 py-4">
           <p className="text-xs font-medium text-emerald-700 flex items-center gap-1.5">
             <CheckCircle2 size={13} /> {t.statActive}
           </p>
-          <p className="text-3xl font-semibold text-emerald-700 mt-2">{activeCount}</p>
+          <p className="text-2xl font-semibold text-emerald-700 mt-1.5">{activeCount}</p>
         </div>
-        <div className="rounded-2xl bg-rose-50 border border-rose-100 px-5 py-4 shadow-sm">
+        <div className="rounded-xl bg-rose-50 border border-rose-100 px-5 py-4">
           <p className="text-xs font-medium text-rose-700 flex items-center gap-1.5">
             <XCircle size={13} /> {t.statInactive}
           </p>
-          <p className="text-3xl font-semibold text-rose-700 mt-2">{inactiveCount}</p>
+          <p className="text-2xl font-semibold text-rose-700 mt-1.5">{inactiveCount}</p>
         </div>
-        <button
-          onClick={() => (showForm ? setShowForm(false) : openCreateForm())}
-          className="hidden sm:flex items-center justify-center rounded-2xl bg-brand px-5 py-4 text-sm font-medium text-white shadow-sm shadow-brand/20 hover:bg-brand-dark transition-colors"
-        >
-          <Plus size={16} className="mr-1.5" />
-          {t.addButton}
-        </button>
       </div>
 
       {/* Filtres colorés = légende des types */}
@@ -507,7 +500,7 @@ export default function ResourcesManager({
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="rounded-2xl border border-line bg-surface p-6 space-y-4 shadow-sm"
+          className="rounded-xl border border-line bg-surface p-6 space-y-4"
         >
           {editingId && (
             <p className="inline-flex items-center gap-1.5 text-xs font-medium text-brand bg-brand-light rounded-full px-3 py-1">
@@ -681,7 +674,7 @@ export default function ResourcesManager({
             return (
               <div
                 key={resource.id}
-                className={`flex items-center gap-4 rounded-2xl border border-line bg-surface px-5 py-4 shadow-sm transition-shadow hover:shadow-md ${
+                className={`flex items-center gap-4 rounded-xl border border-line bg-surface px-5 py-4 transition-colors hover:border-line/80 ${
                   resource.is_active ? "" : "opacity-60"
                 }`}
               >
@@ -716,20 +709,20 @@ export default function ResourcesManager({
                   <button
                     onClick={() => openEditForm(resource)}
                     aria-label={t.edit}
-                    className="inline-flex items-center justify-center h-9 w-9 rounded-xl text-muted hover:bg-brand-light hover:text-brand transition-colors"
+                    className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-muted hover:bg-brand-light hover:text-brand transition-colors"
                   >
-                    <Pencil size={15} />
+                    <Pencil size={14} />
                   </button>
                   <button
                     onClick={() => toggleActive(resource)}
                     aria-label={resource.is_active ? t.deactivate : t.reactivate}
-                    className={`inline-flex items-center justify-center h-9 w-9 rounded-xl transition-colors ${
+                    className={`inline-flex items-center justify-center h-8 w-8 rounded-lg transition-colors ${
                       resource.is_active
                         ? "text-muted hover:bg-rose-50 hover:text-rose-700"
                         : "text-brand hover:bg-brand-light"
                     }`}
                   >
-                    {resource.is_active ? <Ban size={15} /> : <RotateCcw size={15} />}
+                    {resource.is_active ? <Ban size={14} /> : <RotateCcw size={14} />}
                   </button>
                 </div>
               </div>
@@ -737,7 +730,7 @@ export default function ResourcesManager({
           })}
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-line bg-surface/50 py-14 text-center">
+        <div className="rounded-xl border border-dashed border-line bg-surface/50 py-14 text-center">
           <p className="text-sm text-muted">{t.empty}</p>
         </div>
       )}
