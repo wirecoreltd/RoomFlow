@@ -17,6 +17,9 @@ import {
   Pencil,
   Ban,
   RotateCcw,
+  CheckCircle2,
+  XCircle,
+  LayoutGrid,
 } from "lucide-react";
 import type { Resource, ResourceType, CustomType } from "@/lib/types";
 import { usePersistedLanguage } from "@/hooks/useLanguage";
@@ -155,7 +158,11 @@ const uiText: Record<
     empty: string;
     filterAll: string;
     people: string;
-    statActive: (n: number) => string;
+    statTotal: string;
+    statActive: string;
+    statInactive: string;
+    active: string;
+    inactive: string;
   }
 > = {
   fr: {
@@ -190,7 +197,11 @@ const uiText: Record<
     empty: "Aucune ressource pour le moment.",
     filterAll: "Toutes",
     people: "pers.",
-    statActive: (n) => `${n} ressource${n > 1 ? "s" : ""} active${n > 1 ? "s" : ""}`,
+    statTotal: "Total",
+    statActive: "Actives",
+    statInactive: "Inactives",
+    active: "Active",
+    inactive: "Inactive",
   },
   en: {
     pageTitle: "Resource management",
@@ -224,7 +235,11 @@ const uiText: Record<
     empty: "No resources yet.",
     filterAll: "All",
     people: "people",
-    statActive: (n) => `${n} active resource${n > 1 ? "s" : ""}`,
+    statTotal: "Total",
+    statActive: "Active",
+    statInactive: "Inactive",
+    active: "Active",
+    inactive: "Inactive",
   },
 };
 
@@ -292,6 +307,7 @@ export default function ResourcesManager({
   );
 
   const activeCount = resources.filter((r) => r.is_active).length;
+  const inactiveCount = resources.length - activeCount;
 
   function resetForm() {
     setTypeChoice("room");
@@ -413,7 +429,6 @@ export default function ResourcesManager({
         <div>
           <h1 className="font-display text-2xl text-ink">{t.pageTitle}</h1>
           <p className="text-sm text-muted mt-1">{t.pageSubtitle}</p>
-          <p className="text-xs text-brand font-medium mt-2">{t.statActive(activeCount)}</p>
         </div>
         <button
           onClick={() => (showForm ? setShowForm(false) : openCreateForm())}
@@ -421,6 +436,35 @@ export default function ResourcesManager({
         >
           {showForm ? <X size={16} /> : <Plus size={16} />}
           {showForm ? t.closeButton : t.addButton}
+        </button>
+      </div>
+
+      {/* Bandeau de statistiques */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="rounded-xl bg-surface px-4 py-3.5 border border-line">
+          <p className="text-xs text-muted flex items-center gap-1.5">
+            <LayoutGrid size={13} /> {t.statTotal}
+          </p>
+          <p className="text-2xl font-semibold text-ink mt-1">{resources.length}</p>
+        </div>
+        <div className="rounded-xl bg-emerald-50 px-4 py-3.5">
+          <p className="text-xs text-emerald-700 flex items-center gap-1.5">
+            <CheckCircle2 size={13} /> {t.statActive}
+          </p>
+          <p className="text-2xl font-semibold text-emerald-700 mt-1">{activeCount}</p>
+        </div>
+        <div className="rounded-xl bg-rose-50 px-4 py-3.5">
+          <p className="text-xs text-rose-700 flex items-center gap-1.5">
+            <XCircle size={13} /> {t.statInactive}
+          </p>
+          <p className="text-2xl font-semibold text-rose-700 mt-1">{inactiveCount}</p>
+        </div>
+        <button
+          onClick={() => (showForm ? setShowForm(false) : openCreateForm())}
+          className="hidden sm:flex items-center justify-center rounded-xl bg-brand px-4 py-3.5 text-sm font-medium text-white shadow-sm shadow-brand/20 hover:bg-brand-dark transition-colors"
+        >
+          <Plus size={16} className="mr-1.5" />
+          {t.addButton}
         </button>
       </div>
 
@@ -626,67 +670,66 @@ export default function ResourcesManager({
         </form>
       )}
 
-      {/* Grille de cartes */}
+      {/* Liste dense des ressources */}
       {filteredResources.length > 0 ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="flex flex-col gap-2">
           {filteredResources.map((resource) => {
             const cfg = typeConfig[resource.type];
             const Icon = cfg.Icon;
+            const color = resource.color || cfg.color;
             const typeLabel = resource.type === "other" ? resource.custom_type || cfg.label[language] : cfg.label[language];
             return (
               <div
                 key={resource.id}
-                className={`relative rounded-2xl border bg-surface p-4 shadow-sm hover:shadow-md transition-shadow overflow-hidden ${
-                  resource.is_active ? "border-line" : "border-line opacity-60"
+                className={`flex items-center gap-3 sm:gap-4 rounded-xl border border-line bg-surface px-4 py-3 transition-shadow hover:shadow-sm ${
+                  resource.is_active ? "" : "opacity-60"
                 }`}
               >
-                <span
-                  className="absolute left-0 top-0 h-full w-1"
-                  style={{ backgroundColor: resource.color || cfg.color }}
-                />
-                <div className="flex items-start gap-3">
-                  <div
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-                    style={{ backgroundColor: `${(resource.color || cfg.color)}18`, color: resource.color || cfg.color }}
-                  >
-                    <Icon size={19} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-semibold text-ink truncate">{resource.name}</h3>
-                      {!resource.is_active && (
-                        <span className="text-[10px] uppercase tracking-wide text-muted bg-black/5 rounded px-1.5 py-0.5 shrink-0">
-                          {language === "fr" ? "Inactif" : "Inactive"}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted mt-0.5">{typeLabel}</p>
-                    <p className="text-xs text-muted mt-2 leading-relaxed">
-                      {resource.capacity ? `${resource.capacity} ${t.people} · ` : ""}
-                      {resource.location || "—"}
-                      {cfg.hasSchedule
-                        ? ` · ${resource.opening_time.slice(0, 5)}–${resource.closing_time.slice(0, 5)}`
-                        : ""}
-                    </p>
-                  </div>
+                <div
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+                  style={{ backgroundColor: `${color}18`, color }}
+                >
+                  <Icon size={18} />
                 </div>
-                <div className="flex items-center gap-2 mt-4 pt-3 border-t border-line">
+
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-ink truncate">{resource.name}</p>
+                  <p className="text-xs text-muted truncate">
+                    {typeLabel}
+                    {resource.capacity ? ` · ${resource.capacity} ${t.people}` : ""}
+                    {resource.location ? ` · ${resource.location}` : ""}
+                    {cfg.hasSchedule
+                      ? ` · ${resource.opening_time.slice(0, 5)}–${resource.closing_time.slice(0, 5)}`
+                      : ""}
+                  </p>
+                </div>
+
+                <span
+                  className={`hidden sm:inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                    resource.is_active ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
+                  }`}
+                >
+                  {resource.is_active ? t.active : t.inactive}
+                </span>
+
+                <div className="flex items-center gap-1 shrink-0">
                   <button
                     onClick={() => openEditForm(resource)}
-                    className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg text-muted hover:bg-brand-light hover:text-brand transition-colors"
+                    aria-label={t.edit}
+                    className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-muted hover:bg-brand-light hover:text-brand transition-colors"
                   >
-                    <Pencil size={13} /> {t.edit}
+                    <Pencil size={15} />
                   </button>
                   <button
                     onClick={() => toggleActive(resource)}
-                    className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors ml-auto ${
+                    aria-label={resource.is_active ? t.deactivate : t.reactivate}
+                    className={`inline-flex items-center justify-center h-8 w-8 rounded-lg transition-colors ${
                       resource.is_active
-                        ? "text-muted hover:bg-occupied-light hover:text-occupied"
+                        ? "text-muted hover:bg-rose-50 hover:text-rose-700"
                         : "text-brand hover:bg-brand-light"
                     }`}
                   >
-                    {resource.is_active ? <Ban size={13} /> : <RotateCcw size={13} />}
-                    {resource.is_active ? t.deactivate : t.reactivate}
+                    {resource.is_active ? <Ban size={15} /> : <RotateCcw size={15} />}
                   </button>
                 </div>
               </div>
