@@ -200,9 +200,8 @@ export default function BookingModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1.5 text-ink">Motif de la réunion</label>
-                <input
-                  required
+                <label className="block text-sm font-medium mb-1.5 text-ink">Détails</label>
+                <input                  
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Point équipe, entretien, atelier..."
