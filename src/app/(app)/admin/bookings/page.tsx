@@ -3,6 +3,7 @@ import BookingsTable from "@/components/BookingsTable";
 import type { Booking } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
+export const runtime = "edge";
 
 export default async function AdminBookingsPage() {
   const supabase = createClient();
