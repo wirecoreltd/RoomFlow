@@ -31,6 +31,7 @@ export default function PlanningGrid({
   const [draft, setDraft] = useState<{ resourceId: string; start: Date; end: Date } | null>(null);
   const [selected, setSelected] = useState<Booking | null>(null);
   const [now, setNow] = useState(new Date());
+  const [hover, setHover] = useState<{ resourceId: string; top: number; label: string } | null>(null);
 
   useEffect(() => setBookings(initialBookings), [initialBookings]);
 
@@ -84,16 +85,27 @@ export default function PlanningGrid({
     return bookings.filter((b) => b.resource_id === resourceId);
   }
 
-  function handleColumnClick(resource: Resource, e: React.MouseEvent<HTMLDivElement>) {
+  function snappedMinutesFromEvent(e: React.MouseEvent<HTMLDivElement>) {
     const rect = e.currentTarget.getBoundingClientRect();
     const offsetY = e.clientY - rect.top;
     const rawMinutes = dayStartMin + (offsetY / totalHeight) * totalMinutes;
-    const snapped = Math.round(rawMinutes / 15) * 15;
+    return Math.round(rawMinutes / 15) * 15;
+  }
+
+  function handleColumnClick(resource: Resource, e: React.MouseEvent<HTMLDivElement>) {
+    const snapped = snappedMinutesFromEvent(e);
     const start = new Date(`${dateKey}T00:00:00`);
     start.setMinutes(snapped);
     const end = new Date(start);
     end.setMinutes(start.getMinutes() + 60);
     setDraft({ resourceId: resource.id, start, end });
+  }
+
+  function handleColumnHover(resource: Resource, e: React.MouseEvent<HTMLDivElement>) {
+    const snapped = snappedMinutesFromEvent(e);
+    const top = ((snapped - dayStartMin) / totalMinutes) * totalHeight;
+    const label = `${String(Math.floor(snapped / 60)).padStart(2, "0")}:${String(snapped % 60).padStart(2, "0")}`;
+    setHover({ resourceId: resource.id, top, label });
   }
 
   if (resources.length === 0) {
@@ -141,10 +153,26 @@ export default function PlanningGrid({
             {resources.map((resource) => (
               <div
                 key={resource.id}
-                className="relative border-l border-line cursor-crosshair"
+                className="relative border-l border-line cursor-pointer group"
                 style={{ height: totalHeight }}
                 onClick={(e) => handleColumnClick(resource, e)}
+                onMouseMove={(e) => handleColumnHover(resource, e)}
+                onMouseLeave={() => setHover(null)}
               >
+                {hover && hover.resourceId === resource.id && (
+                  <div
+                    className="absolute left-1 right-1 flex items-center gap-1.5 pointer-events-none z-10 -translate-y-1/2"
+                    style={{ top: hover.top }}
+                  >
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand text-white text-xs leading-none shadow-sm">
+                      +
+                    </span>
+                    <span className="text-[11px] font-mono text-brand bg-brand-light px-1.5 py-0.5 rounded shadow-sm">
+                      {hover.label}
+                    </span>
+                  </div>
+                )}
+
                 {hourMarks.map((m) => (
                   <div
                     key={m}
